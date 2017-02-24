@@ -49,17 +49,18 @@ class SlideEdit(QtGui.QLineEdit):
         self._foregroundColor.setAlphaF(0.7)
 
     def setCurrentValue(self, newValue):
+        curVal = 0
         if self._integerStep is False:
-            self._currentValue = newValue
+            curVal = newValue
         else:
             if newValue < 0.5:
-                self._currentValue = 0
+                curVal = 0
             else:
-                self._currentValue = math.ceil(newValue)
+                curVal = math.ceil(newValue)
 
         if self._currentValue > self._max and self._lockBounds is False:
             self._max = newValue
-        self._currentValue = newValue
+        self._currentValue = curVal
         self.setText(QtCore.QString.number(self._currentValue))
 
     def mousePressEvent(self, QMouseEvent):
@@ -80,22 +81,27 @@ class SlideEdit(QtGui.QLineEdit):
 
         if self._isDown:
             px = QMouseEvent.pos().x()
+            print (px / self.width())
             if(px >= 0 and px <= self.width()):
                 self.handle.setX(px)
                 self._lockBounds = True
-                self.setCurrentValue( (px / self.width()) * self._max )
+                self.setCurrentValue( (px / float(self.width())) * self._max )
                 self._lockBounds = False
 
     def wheelEvent(self, QWheelEvent):
-        step = QWheelEvent.delta() / 50.0
+        step = QWheelEvent.delta() / float(80.0)
         curVal = self._currentValue - step
         if self._lockBounds is True:
             if curVal > self._max:
                 self.setCurrentValue(self._max)
+                return
             elif curVal < self._min:
                 self.setCurrentValue(self._min)
+                return
             else:
                 self.setCurrentValue(curVal)
+                return
+        self.setCurrentValue(curVal)
 
     def paintEvent(self, QPaintEvent):
         super(SlideEdit, self).paintEvent(QPaintEvent)

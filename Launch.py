@@ -16,6 +16,7 @@ class MainWindow(QtGui.QMainWindow):
         slideEdit = SlideEdit()
         layout = QtGui.QGridLayout()
         closeBtn = QtGui.QPushButton("Close", self)
+        closeBtn.clicked.connect(self.close)
         layout.addWidget(slideEdit, 0, 0)
         layout.addWidget(closeBtn, 2, 0)
         centWidget = QtGui.QWidget(self)
