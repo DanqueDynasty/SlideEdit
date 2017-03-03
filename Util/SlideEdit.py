@@ -3,6 +3,7 @@ import math
 
 class BoundsDialog(QtGui.QDialog):
     def __init__(self):
+        super(BoundsDialog, self).__init__()
         _minLbl = QtGui.QLabel("Min: ", self)
         self._minLE = QtGui.QLineEdit(self);
         _maxLbl = QtGui.QLabel("Max: ", self)
@@ -31,10 +32,11 @@ class BoundsDialog(QtGui.QDialog):
         self.setLayout(centralLayout)
 
 class SlideEdit(QtGui.QLineEdit):
-    valueChanged = QtCore.pyqtSignal()
+    valueChanged = QtCore.pyqtSignal(object)
 
     def __init__(self):
         super(SlideEdit, self).__init__()
+        self._boundsDiag = BoundsDialog()
         self.setAlignment(QtCore.Qt.AlignCenter)
         self._min = 0.0
         self._max = 10.0
@@ -47,6 +49,16 @@ class SlideEdit(QtGui.QLineEdit):
         self._isDown = False
         self._foregroundColor = QtGui.QColor(83, 125, 148).lighter(120)
         self._foregroundColor.setAlphaF(0.7)
+        self.textChanged.connect(self.setCurrentValueStr)
+
+        #Context Menu Actions
+        self._resetBoundsAct = QtGui.QAction("Reset Bounds", self)
+        self._lockBoundsAct = QtGui.QAction("Lock Bounds", self)
+        self._resetMin = QtGui.QAction("Reset Min", self)
+        self._resetMax = QtGui.QAction("Reset Max", self)
+        self._intStep = QtGui.QAction("Int Step", self)
+        self._boundsDiagAct = QtGui.QAction("Edit Bounds", self)
+
 
     def setCurrentValue(self, newValue):
         curVal = 0
@@ -62,9 +74,14 @@ class SlideEdit(QtGui.QLineEdit):
             self._max = newValue
         self._currentValue = curVal
         self.setText(QtCore.QString.number(self._currentValue))
+        self.valueChanged.emit(self._currentValue)
+
+    def setCurrentValueStr(self, value):
+        if type(value) is QtCore.QString:
+            f = value.toFloat()
+            self.setCurrentValue(value.toFloat()[0])
 
     def mousePressEvent(self, QMouseEvent):
-        print(QMouseEvent.button());
         if (QMouseEvent.button() == 1) and self.handle.contains(QMouseEvent.pos()):
             self._isDown = True
 
@@ -129,4 +146,13 @@ class SlideEdit(QtGui.QLineEdit):
         p.setBrush(QtGui.QBrush(self._foregroundColor))
         p.drawRect(self.progressed)
 
-
+    def contextMenuEvent(self, QContextMenuEvent):
+        menu = QtGui.QMenu(self)
+        menu.addAction(self._resetBoundsAct)
+        menu.addAction(self._lockBoundsAct)
+        menu.addSeparator()
+        menu.addAction(self._resetMin)
+        menu.addAction(self._resetMax)
+        menu.addSeparator()
+        menu.addAction(self._boundsDiagAct)
+        menu.exec_(QContextMenuEvent.globalPos())
