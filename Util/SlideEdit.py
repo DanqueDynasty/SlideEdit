@@ -72,6 +72,9 @@ class SlideEdit(QtGui.QLineEdit):
 
         if self._currentValue > self._max and self._lockBounds is False:
             self._max = newValue
+        elif self._currentValue > self._max and self._lockBounds is True:
+            curVal = self._max
+
         self._currentValue = curVal
         self.setText(QtCore.QString.number(self._currentValue))
         self.valueChanged.emit(self._currentValue)
